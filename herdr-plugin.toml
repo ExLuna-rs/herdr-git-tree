@@ -1,0 +1,37 @@
+id = "git-tree"
+name = "Git Tree"
+version = "0.1.0"
+min_herdr_version = "0.8.0"
+description = "Interactive git graph with real-time diffs and branch management"
+platforms = ["linux", "macos", "windows"]
+
+[[build]]
+command = ["cargo", "build", "--release"]
+
+[[panes]]
+id = "tree"
+title = "Git Tree"
+placement = "split"
+command = ["target/release/herdr-git-tree"]
+platforms = ["linux", "macos"]
+
+[[panes]]
+id = "tree-windows"
+title = "Git Tree"
+placement = "split"
+command = ["target/release/herdr-git-tree.exe"]
+platforms = ["windows"]
+
+[[actions]]
+id = "open"
+title = "Open Git Tree"
+contexts = ["workspace"]
+command = ["target/release/herdr-git-tree"]
+platforms = ["linux", "macos"]
+
+[[actions]]
+id = "open-windows"
+title = "Open Git Tree"
+contexts = ["workspace"]
+command = ["target/release/herdr-git-tree.exe"]
+platforms = ["windows"]

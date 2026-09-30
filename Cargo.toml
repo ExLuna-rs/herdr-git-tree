@@ -1,0 +1,16 @@
+[package]
+name = "herdr-git-tree"
+version = "0.1.0"
+edition = "2021"
+description = "Interactive git graph with real-time diffs and branch management — herdr plugin"
+license = "MIT"
+repository = "https://github.com/ExLuna-rs/herdr-git-tree"
+keywords = ["herdr", "git", "terminal", "tui", "plugin"]
+
+[dependencies]
+ratatui = "0.29"
+crossterm = "0.28"
+git2 = "0.19"
+chrono = "0.4"
+notify = "7"
+unicode-width = "0.2"
