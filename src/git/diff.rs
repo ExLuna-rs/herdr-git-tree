@@ -26,6 +26,7 @@ pub struct DiffLine {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(dead_code)]
 pub enum LineKind {
     Context,
     Addition,
@@ -61,6 +62,7 @@ pub fn get_commit_diff(repo: &Repository, oid: Oid) -> Result<Vec<FileDiff>, Str
 }
 
 /// Get the diff of the working tree against HEAD.
+#[allow(dead_code)]
 pub fn get_working_diff(repo: &Repository) -> Result<Vec<FileDiff>, String> {
     let head_tree = repo
         .head()

@@ -1,8 +1,8 @@
 id = "git-tree"
 name = "Git Tree"
-version = "0.1.0"
+version = "0.2.0"
 min_herdr_version = "0.8.0"
-description = "Interactive git graph with real-time diffs and branch management"
+description = "Interactive git graph sidebar with real-time updates"
 platforms = ["linux", "macos", "windows"]
 
 [[build]]
@@ -23,15 +23,15 @@ command = ["target/release/herdr-git-tree.exe"]
 platforms = ["windows"]
 
 [[actions]]
-id = "open"
-title = "Open Git Tree"
+id = "toggle"
+title = "Toggle Git Tree sidebar"
 contexts = ["workspace"]
-command = ["target/release/herdr-git-tree"]
+command = ["target/release/herdr-git-tree", "toggle"]
 platforms = ["linux", "macos"]
 
 [[actions]]
-id = "open-windows"
-title = "Open Git Tree"
+id = "toggle-windows"
+title = "Toggle Git Tree sidebar"
 contexts = ["workspace"]
-command = ["target/release/herdr-git-tree.exe"]
+command = ["target/release/herdr-git-tree.exe", "toggle"]
 platforms = ["windows"]

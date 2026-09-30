@@ -101,6 +101,7 @@ pub fn switch_branch(repo: &Repository, name: &str) -> Result<(), String> {
 }
 
 /// Create a new branch at the given target (or HEAD if None).
+#[allow(dead_code)]
 pub fn create_branch(
     repo: &Repository,
     name: &str,

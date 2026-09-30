@@ -118,6 +118,21 @@ impl App {
         let mut last_tick = Instant::now();
 
         loop {
+            // Update scroll offset before drawing so mouse clicks stay in sync.
+            {
+                let size = terminal.size()?;
+                // visible area = total height - 6 (4 header + 2 footer)
+                let content_lines = size.height.saturating_sub(6) as usize;
+                let visible_commits = content_lines / 2; // 2 lines per commit
+                if visible_commits > 0 {
+                    if self.selected < self.scroll_offset {
+                        self.scroll_offset = self.selected;
+                    } else if self.selected >= self.scroll_offset + visible_commits {
+                        self.scroll_offset = self.selected - visible_commits + 1;
+                    }
+                }
+            }
+
             terminal.draw(|f| ui::draw(f, self))?;
 
             let timeout = tick_rate.saturating_sub(last_tick.elapsed());
@@ -221,9 +236,8 @@ impl App {
                 MouseEventKind::ScrollDown => self.move_selection(3),
                 MouseEventKind::ScrollUp => self.move_selection(-3),
                 MouseEventKind::Down(_) => {
-                    // Click row is relative to the graph area (after status bar).
-                    // Each commit takes 2 lines. Adjust for the border (1 line top + 1 status).
-                    let graph_row = row.saturating_sub(2) as usize;
+                    // Each commit takes 2 rows. Header is 4 rows.
+                    let graph_row = row.saturating_sub(4) as usize;
                     let commit_idx = self.scroll_offset + graph_row / 2;
                     if commit_idx < self.commits.len() {
                         self.selected = commit_idx;

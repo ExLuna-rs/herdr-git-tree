@@ -9,6 +9,7 @@ use ratatui::widgets::Paragraph;
 use ratatui::Frame;
 
 /// Top bar: current branch, ahead/behind.
+#[allow(dead_code)]
 pub fn draw_top(f: &mut Frame, app: &App, area: Rect) {
     let mut spans: Vec<Span> = Vec::new();
 
@@ -65,6 +66,7 @@ pub fn draw_top(f: &mut Frame, app: &App, area: Rect) {
 }
 
 /// Bottom bar: contextual keybinding help.
+#[allow(dead_code)]
 pub fn draw_bottom(f: &mut Frame, app: &App, area: Rect) {
     let help = match app.view {
         View::Graph => keys::GRAPH_HELP,
