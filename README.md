@@ -4,7 +4,7 @@
 [![Build](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/ExLuna-rs/herdr-git-tree)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Herdr](https://img.shields.io/badge/Herdr-plugin-purple)](https://herdr.dev)
-[![Ratatui](https://img.shields.io/badge/built%20with-ratatui-cyan)](https://ratatui.rs)
+[![Built With Ratatui](https://img.shields.io/badge/Built_With-Ratatui-000?logo=ratatui&logoColor=fff&labelColor=000&color=fff)](https://ratatui.rs)
 [![git2](https://img.shields.io/badge/powered%20by-libgit2-red)](https://libgit2.org)
 
 Interactive git graph with real-time updates and branch management — a cross-platform [herdr](https://herdr.dev) plugin.
