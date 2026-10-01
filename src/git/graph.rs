@@ -255,13 +255,10 @@ fn render_commit_row(
                         color_index: row[pos].color_index,
                     };
                 } else if pos != active_col * 2 {
-                    // Color transition: chars near commit = commit color,
-                    // chars near branch endpoint = branch color
-                    let mid = (left * 2 + right * 2) / 2;
-                    let color = if pos <= mid { active_col } else { pcol };
+                    // Entire merge line uses branch color
                     row[pos] = GraphChar {
                         ch: '─',
-                        color_index: color,
+                        color_index: pcol,
                     };
                 }
             }
@@ -332,7 +329,7 @@ fn render_connector_row(
             let start_pos = commit_col * 2;
             if start_pos < char_width {
                 row[start_pos] = GraphChar {
-                    ch: if target_col < commit_col { '╰' } else { '╯' },
+                    ch: if target_col < commit_col { '╯' } else { '╰' },
                     color_index: commit_col,
                 };
             }
@@ -343,13 +340,8 @@ fn render_connector_row(
                     if row[pos].ch == '│' {
                         row[pos] = GraphChar { ch: '┼', color_index: row[pos].color_index };
                     } else {
-                        let mid = (left * 2 + right * 2) / 2;
-                        let color = if pos <= mid {
-                            if commit_col < target_col { commit_col } else { target_col }
-                        } else {
-                            if commit_col < target_col { target_col } else { commit_col }
-                        };
-                        row[pos] = GraphChar { ch: '─', color_index: color };
+                        // Entire convergence line uses branch color
+                        row[pos] = GraphChar { ch: '─', color_index: commit_col };
                     }
                 }
             }
