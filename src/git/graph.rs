@@ -150,7 +150,7 @@ pub fn build_graph(repo: &Repository, max_commits: usize) -> Result<Vec<CommitNo
 
         // Render rows.
         let graph_chars = render_commit_row(&columns, col, is_merge, is_on_remote, &merge_parent_cols);
-        let connector_chars = render_connector_row(&columns);
+        let connector_chars = render_connector_row(&columns, col, &merge_parent_cols);
 
         nodes.push(CommitNode {
             oid,
@@ -167,9 +167,7 @@ pub fn build_graph(repo: &Repository, max_commits: usize) -> Result<Vec<CommitNo
         });
     }
 
-    // Reverse so oldest is at top, newest at bottom.
-    nodes.reverse();
-
+    // Most recent at top (standard git log order).
     Ok(nodes)
 }
 
@@ -208,7 +206,11 @@ fn render_commit_row(
 
     // Draw active lanes (│) — skip the commit column and merge endpoints.
     for i in 0..width {
-        if i == active_col || merge_parent_cols.contains(&i) {
+        if i == active_col {
+            continue;
+        }
+        // Merge endpoint columns get their own glyph below — skip │ for them.
+        if merge_parent_cols.contains(&i) {
             continue;
         }
         if columns.get(i).and_then(|c| *c).is_some() {
@@ -220,7 +222,6 @@ fn render_commit_row(
     }
 
     // Draw commit node.
-    // ● = on remote (pushed), ○ = local only (unpushed) or merge
     row[active_col * 2] = GraphChar {
         ch: if !is_on_remote { '○' } else { '●' },
         color_index: active_col,
@@ -237,15 +238,16 @@ fn render_commit_row(
             (active_col, pcol)
         };
 
-        // Horizontal fill between the two columns.
+        // Horizontal fill between the two columns (only between positions).
         for pos in (left * 2 + 1)..=(right * 2 - 1) {
             if pos < row.len() {
                 if row[pos].ch == '│' {
+                    // A lane crosses our horizontal merge line.
                     row[pos] = GraphChar {
                         ch: '┼',
-                        color_index: active_col,
+                        color_index: row[pos].color_index,
                     };
-                } else {
+                } else if pos != active_col * 2 {
                     row[pos] = GraphChar {
                         ch: '─',
                         color_index: active_col,
@@ -254,7 +256,9 @@ fn render_commit_row(
             }
         }
 
-        // Merge endpoint curve.
+        // Merge endpoint: use curve that connects DOWN into the lane below.
+        // Since graph reads top→bottom (newest first), merge parents are below,
+        // so curves open downward.
         let endpoint_pos = pcol * 2;
         if endpoint_pos < row.len() {
             row[endpoint_pos] = GraphChar {
@@ -267,8 +271,15 @@ fn render_commit_row(
     row
 }
 
-/// Render the connector row between commits: │ for active lanes.
-fn render_connector_row(columns: &[Option<Oid>]) -> Vec<GraphChar> {
+/// Render the connector row between commits — fully connected, no gaps.
+///
+/// Every active lane gets a `│`.  The commit column itself also gets `│` so the
+/// line from one ● to the next ● is seamless.
+fn render_connector_row(
+    columns: &[Option<Oid>],
+    _commit_col: usize,
+    _merge_parent_cols: &[usize],
+) -> Vec<GraphChar> {
     let width = columns.len();
     if width == 0 {
         return Vec::new();
@@ -283,6 +294,11 @@ fn render_connector_row(columns: &[Option<Oid>]) -> Vec<GraphChar> {
         char_width
     ];
 
+    // Draw │ for every active lane — this is the key to "no gaps".
+    // After processing a commit, `columns` already reflects the updated state
+    // (the commit's column now holds its first parent, and merge parents have
+    // their own columns).  Drawing │ for all of them produces a seamless
+    // vertical line that connects one commit dot to the next.
     for i in 0..width {
         if columns.get(i).and_then(|c| *c).is_some() {
             row[i * 2] = GraphChar {
