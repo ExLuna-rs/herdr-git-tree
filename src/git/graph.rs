@@ -116,9 +116,16 @@ pub fn build_graph(repo: &Repository, max_commits: usize) -> Result<Vec<CommitNo
         columns[col] = None;
 
         // First parent continues in the same column (if not already elsewhere).
+        // Track if the lane converges (branch base point).
+        let mut converge_to: Option<usize> = None;
         if let Some(&first_parent) = parents.first() {
-            if find_column(&columns, first_parent).is_none() {
+            let existing = find_column(&columns, first_parent);
+            if existing.is_none() {
                 columns[col] = Some(first_parent);
+            } else {
+                // First parent is already in another column — this lane ENDS here.
+                // The branch converges back to the parent's column.
+                converge_to = existing;
             }
         }
 
@@ -150,7 +157,7 @@ pub fn build_graph(repo: &Repository, max_commits: usize) -> Result<Vec<CommitNo
 
         // Render rows.
         let graph_chars = render_commit_row(&columns, col, is_merge, is_on_remote, &merge_parent_cols);
-        let connector_chars = render_connector_row(&columns, col, &merge_parent_cols);
+        let connector_chars = render_connector_row(&columns, col, &merge_parent_cols, converge_to);
 
         nodes.push(CommitNode {
             oid,
@@ -248,9 +255,13 @@ fn render_commit_row(
                         color_index: row[pos].color_index,
                     };
                 } else if pos != active_col * 2 {
+                    // Color transition: chars near commit = commit color,
+                    // chars near branch endpoint = branch color
+                    let mid = (left * 2 + right * 2) / 2;
+                    let color = if pos <= mid { active_col } else { pcol };
                     row[pos] = GraphChar {
                         ch: '─',
-                        color_index: active_col,
+                        color_index: color,
                     };
                 }
             }
@@ -275,12 +286,16 @@ fn render_commit_row(
 ///
 /// Every active lane gets a `│`.  The commit column itself also gets `│` so the
 /// line from one ● to the next ● is seamless.
+/// If `converge_to` is set, draw a curve from `commit_col` to that column
+/// (branch base point — lane ends and merges into parent's lane).
 fn render_connector_row(
     columns: &[Option<Oid>],
-    _commit_col: usize,
+    commit_col: usize,
     _merge_parent_cols: &[usize],
+    converge_to: Option<usize>,
 ) -> Vec<GraphChar> {
-    let width = columns.len();
+    let max_col = converge_to.unwrap_or(0).max(commit_col);
+    let width = columns.len().max(max_col + 1);
     if width == 0 {
         return Vec::new();
     }
@@ -294,17 +309,59 @@ fn render_connector_row(
         char_width
     ];
 
-    // Draw │ for every active lane — this is the key to "no gaps".
-    // After processing a commit, `columns` already reflects the updated state
-    // (the commit's column now holds its first parent, and merge parents have
-    // their own columns).  Drawing │ for all of them produces a seamless
-    // vertical line that connects one commit dot to the next.
+    // Draw │ for every active lane.
     for i in 0..width {
         if columns.get(i).and_then(|c| *c).is_some() {
             row[i * 2] = GraphChar {
                 ch: '│',
                 color_index: i,
             };
+        }
+    }
+
+    // Draw convergence curve (branch base: this lane ends, connects to parent lane)
+    if let Some(target_col) = converge_to {
+        if target_col != commit_col {
+            let (left, right) = if target_col < commit_col {
+                (target_col, commit_col)
+            } else {
+                (commit_col, target_col)
+            };
+
+            // Starting point: curve at commit_col
+            let start_pos = commit_col * 2;
+            if start_pos < char_width {
+                row[start_pos] = GraphChar {
+                    ch: if target_col < commit_col { '╰' } else { '╯' },
+                    color_index: commit_col,
+                };
+            }
+
+            // Horizontal fill between
+            for pos in (left * 2 + 1)..=(right * 2 - 1) {
+                if pos < char_width {
+                    if row[pos].ch == '│' {
+                        row[pos] = GraphChar { ch: '┼', color_index: row[pos].color_index };
+                    } else {
+                        let mid = (left * 2 + right * 2) / 2;
+                        let color = if pos <= mid {
+                            if commit_col < target_col { commit_col } else { target_col }
+                        } else {
+                            if commit_col < target_col { target_col } else { commit_col }
+                        };
+                        row[pos] = GraphChar { ch: '─', color_index: color };
+                    }
+                }
+            }
+
+            // Endpoint: junction at target lane
+            let end_pos = target_col * 2;
+            if end_pos < char_width {
+                row[end_pos] = GraphChar {
+                    ch: if target_col < commit_col { '├' } else { '┤' },
+                    color_index: target_col,
+                };
+            }
         }
     }
 

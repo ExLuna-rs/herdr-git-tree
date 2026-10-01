@@ -138,7 +138,12 @@ impl App {
             let timeout = tick_rate.saturating_sub(last_tick.elapsed());
             if event::poll(timeout)? {
                 match event::read()? {
-                    Event::Key(key) => self.on_key(key.code, key.modifiers),
+                    Event::Key(key) => {
+                        // Only handle key press, ignore release/repeat
+                        if key.kind == crossterm::event::KeyEventKind::Press {
+                            self.on_key(key.code, key.modifiers);
+                        }
+                    }
                     Event::Mouse(mouse) => self.on_mouse(mouse.kind, mouse.row),
                     Event::Resize(_, _) => {} // ratatui handles this
                     _ => {}
