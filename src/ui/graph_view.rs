@@ -161,34 +161,34 @@ pub fn draw(f: &mut Frame, app: &App, area: Rect) {
 
         // --- Line 2: connector graph + hash + refs ---
         let mut spans2: Vec<Span> = Vec::new();
-        let mut used2: usize = 0;
+        let mut _used2: usize = 0;
 
         for gc in &commit.connector_chars {
             let color = lane_color(gc.color_index);
             spans2.push(Span::styled(gc.ch.to_string(), Style::default().fg(color)));
-            used2 += 1;
+            _ _used2 += 1;
         }
         let pad2 = graph_width.saturating_sub(commit.connector_chars.len());
         if pad2 > 0 {
             spans2.push(Span::raw(" ".repeat(pad2)));
-            used2 += pad2;
+            _ _used2 += pad2;
         }
 
         spans2.push(Span::raw("  "));
-        used2 += 2;
+        _ _used2 += 2;
 
         spans2.push(Span::styled(
             &commit.short_hash,
             Style::default().fg(Color::Rgb(100, 100, 120)),
         ));
-        used2 += commit.short_hash.len();
+        _ _used2 += commit.short_hash.len();
 
         let refs_text = compact_refs(&commit.refs);
         if !refs_text.is_empty() {
             spans2.push(Span::raw(" "));
-            used2 += 1;
+            _ _used2 += 1;
             for span in render_refs_inline(&commit.refs, Color::Reset) {
-                used2 += span.content.len();
+                _ _used2 += span.content.len();
                 spans2.push(span);
             }
         }

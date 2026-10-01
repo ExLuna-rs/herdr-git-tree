@@ -1,6 +1,6 @@
 [package]
 name = "herdr-git-tree"
-version = "0.1.0"
+version = "0.3.0"
 edition = "2021"
 description = "Interactive git graph with real-time diffs and branch management — herdr plugin"
 license = "MIT"

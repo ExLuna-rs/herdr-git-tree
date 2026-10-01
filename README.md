@@ -1,13 +1,22 @@
 # herdr-git-tree
 
-Interactive git graph with real-time diffs and branch management — a cross-platform [herdr](https://herdr.dev) plugin.
+[![Rust](https://img.shields.io/badge/Rust-stable-orange?logo=rust)](https://www.rust-lang.org/)
+[![Build](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/ExLuna-rs/herdr-git-tree)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Herdr](https://img.shields.io/badge/Herdr-plugin-purple)](https://herdr.dev)
+[![Ratatui](https://img.shields.io/badge/built%20with-ratatui-cyan)](https://ratatui.rs)
+[![git2](https://img.shields.io/badge/powered%20by-libgit2-red)](https://libgit2.org)
+
+Interactive git graph with real-time updates and branch management — a cross-platform [herdr](https://herdr.dev) plugin.
 
 ## Features
 
-- **Git Graph** — visual commit tree with colored branch lanes, tags, and HEAD marker
+- **Git Graph** — visual commit tree with colored branch lanes, rounded curves (`╭╮╰╯`), and proper junctions (`├┤┼`)
+- **Pushed / Unpushed** — `●` for commits on remote, `○` for local-only commits
 - **Real-time refresh** — file watcher detects changes and auto-updates the graph
 - **Diff viewer** — color-coded diffs (green additions, red deletions) per commit
 - **Branch management** — list, checkout, and delete branches
+- **Sidebar toggle** — open/close with one keybinding, works as a split pane
 - **Mouse + keyboard** — click to select, scroll to navigate, full keyboard controls
 - **Cross-platform** — works on Linux, macOS, and Windows
 - **Standalone** — works inside herdr or as a standalone terminal app
@@ -42,11 +51,12 @@ herdr-git-tree
 Add to your herdr `config.toml`:
 
 ```toml
+# Toggle sidebar
 [[keys.command]]
 key = "prefix+alt+t"
 type = "plugin_action"
-command = "git-tree.open-windows"    # or "git-tree.open" on Linux/macOS
-description = "open git tree"
+command = "git-tree.toggle-windows"    # or "git-tree.toggle" on Linux/macOS
+description = "toggle git tree sidebar"
 ```
 
 ### Graph view
@@ -72,10 +82,7 @@ description = "open git tree"
 |-----|--------|
 | `j` / `↓` | Scroll down |
 | `k` / `↑` | Scroll up |
-| `J` / `PgDn` | Page down |
-| `K` / `PgUp` | Page up |
 | `Esc` / `q` | Back to graph |
-| Mouse scroll | Scroll |
 
 ### Branch list
 
@@ -87,22 +94,18 @@ description = "open git tree"
 | `d` | Delete branch |
 | `Esc` / `q` | Back to graph |
 
-## UI Preview
+## Graph symbols
 
-```
- 🌿 main ↑2 ↓0
- * a1b2c3d (HEAD)(main) fix: correct event parsing
- │         corentinjsn · 2h ago
- * f643a8d (v0.2.0) release: v0.2.0
- │         corentinjsn · 3h ago
- │ * d14dafa (feat/save) feat: save template
- │/│       corentinjsn · 4h ago
- * eafc917 docs: update README
- │         corentinjsn · 5h ago
- * 02bd94d feat: initial plugin
-           corentinjsn · 6h ago
- [↑/k] up  [↓/j] down  [Enter] diff  [b] branches  [r] refresh  [q] quit
-```
+| Symbol | Meaning |
+|--------|---------|
+| `●` | Commit (on remote) |
+| `○` | Commit (local only / unpushed) |
+| `│` | Branch lane |
+| `─` | Merge/branch connection |
+| `╭` `╮` | Branch curve (top) |
+| `╰` `╯` | Branch curve (bottom) |
+| `├` `┤` | Junction (branch meets lane) |
+| `┼` | Crossing (branch crosses lane) |
 
 ## Requirements
 
@@ -110,14 +113,21 @@ description = "open git tree"
 - Rust toolchain (for building from source)
 - A git repository
 
+## Tech Stack
+
+- [Rust](https://www.rust-lang.org/) — cross-platform, zero runtime dependencies
+- [ratatui](https://ratatui.rs) — terminal UI framework
+- [git2](https://docs.rs/git2) — libgit2 bindings for native git access
+- [crossterm](https://docs.rs/crossterm) — terminal events (keyboard + mouse)
+- [notify](https://docs.rs/notify) — file system watcher for real-time updates
+
 ## Roadmap
 
-- [ ] Syntax highlighting in diffs (syntect)
-- [ ] Search commits by message (`/`)
-- [ ] Create branch from commit
-- [ ] Merge branch visualization
-- [ ] Cherry-pick support
+- [ ] Uncommitted changes indicator at top of graph
 - [ ] Stash viewer
+- [ ] Search commits by message (`/`)
+- [ ] Pixel rendering via Kitty/iTerm2 graphics protocol (auto-detected)
+- [ ] Syntax highlighting in diffs
 
 ## License
 
