@@ -166,29 +166,29 @@ pub fn draw(f: &mut Frame, app: &App, area: Rect) {
         for gc in &commit.connector_chars {
             let color = lane_color(gc.color_index);
             spans2.push(Span::styled(gc.ch.to_string(), Style::default().fg(color)));
-            _ _used2 += 1;
+            _used2 += 1;
         }
         let pad2 = graph_width.saturating_sub(commit.connector_chars.len());
         if pad2 > 0 {
             spans2.push(Span::raw(" ".repeat(pad2)));
-            _ _used2 += pad2;
+            _used2 += pad2;
         }
 
         spans2.push(Span::raw("  "));
-        _ _used2 += 2;
+        _used2 += 2;
 
         spans2.push(Span::styled(
             &commit.short_hash,
             Style::default().fg(Color::Rgb(100, 100, 120)),
         ));
-        _ _used2 += commit.short_hash.len();
+        _used2 += commit.short_hash.len();
 
         let refs_text = compact_refs(&commit.refs);
         if !refs_text.is_empty() {
             spans2.push(Span::raw(" "));
-            _ _used2 += 1;
+            _used2 += 1;
             for span in render_refs_inline(&commit.refs, Color::Reset) {
-                _ _used2 += span.content.len();
+                _used2 += span.content.len();
                 spans2.push(span);
             }
         }
